@@ -46,12 +46,26 @@ mpirun -np 64 ./build/all_reduce_perf -b 8M -e 8M -f 2 -g 1
 - `-f 2`: Number of iterations per message size.
 
 ⚠️ Ensure the number of Worker replicas in your YAML matches the number of nodes. For example, for 8 nodes:
-```bash
+```yaml
 spec:
   mpiReplicaSpecs:
     Worker:
       replicas: 8
 ```
+
+⚠️ Ensure the image matches the CUDA version supported on the nodes and has SSH support:
+```yaml
+spec:
+  containers:
+    - name: mpi-launcher
+      image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh
+
+spec:
+  containers:
+    - name: mpi-worker
+      image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh
+```
+
 #### 3. Launch the NCCL Test Job
 
 Apply your job definition (nccl_tests.yaml):
