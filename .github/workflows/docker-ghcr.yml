@@ -6,6 +6,7 @@ on:
     paths:
       - 'docker/Dockerfile'
       - 'kubernetes/Dockerfile'
+      - '.github/workflows/docker-ghcr.yml'
 
 jobs:
   build-and-push:
