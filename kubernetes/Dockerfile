@@ -14,7 +14,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Prepares SSH for mpi-operator
-RUN echo "UserKnownHostsFile /dev/null" >> /etc/ssh/ssh_config && \
+RUN mkdir -p /var/run/sshd && \
+    echo "UserKnownHostsFile /dev/null" >> /etc/ssh/ssh_config && \
+    echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config && \
     sed -i 's/#\(StrictModes \).*/\1no/g' /etc/ssh/sshd_config
 
 ENV MPI_HOME=/usr/lib/x86_64-linux-gnu/openmpi
