@@ -6,7 +6,7 @@ on:
     paths:
       - 'docker/Dockerfile'
       - 'kubernetes/Dockerfile'
-      - '.github/workflows/docker-ghcr.yml'
+      - '.github/workflows/docker-ghcr-cuda1251-ubuntu2204.yml'
 
 jobs:
   build-and-push:
@@ -15,9 +15,7 @@ jobs:
     strategy:
         matrix:
           include:
-            - cuda: 12.6.3
-              ubuntu: 22.04
-            - cuda: 12.4.1
+            - cuda: 12.5.1
               ubuntu: 22.04  
 
     permissions:

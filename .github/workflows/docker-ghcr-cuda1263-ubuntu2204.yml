@@ -1,0 +1,56 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docker/Dockerfile'
+      - 'kubernetes/Dockerfile'
+      - '.github/workflows/docker-ghcr-cuda1263-ubuntu2204.yml'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+        matrix:
+          include:
+            - cuda: 12.6.3
+              ubuntu: 22.04
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate Docker to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image with SSH server (for kubernetes mpi-operator)
+        run: |
+          docker build \
+            --build-arg CUDA_VERSION=${{ matrix.cuda }} \
+            --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
+            -f kubernetes/Dockerfile \
+            --label org.opencontainers.image.description="NCCL MPI test & SSH server image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
+            --label org.opencontainers.image.source="https://github.com/voltagepark/nccl-tests" \
+            --label org.opencontainers.image.version="cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
+            -t ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh \
+            .
+          docker push ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg CUDA_VERSION=${{ matrix.cuda }} \
+            --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
+            -f docker/Dockerfile \
+            --label org.opencontainers.image.description="NCCL MPI test image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
+            --label org.opencontainers.image.source="https://github.com/voltagepark/nccl-tests" \
+            --label org.opencontainers.image.version="cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
+            -t ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}\
+            .
+          docker push ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}
