@@ -17,7 +17,7 @@ jobs:
             - cuda: 12.6.3
               ubuntu: 22.04
             - cuda: 12.4.1
-              ubuntu: 20.04  
+              ubuntu: 22.04  
 
     permissions:
       contents: read
