@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
             - name: mpi-launcher
-              image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh
+              image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh-server
               args:
                 - mpirun
                 - --allow-run-as-root
@@ -35,7 +35,7 @@ spec:
           runtimeClassName: nvidia
           containers:
             - name: mpi-worker
-              image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh
+              image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh-server
               resources:
                 limits:
                   nvidia.com/gpu: 8

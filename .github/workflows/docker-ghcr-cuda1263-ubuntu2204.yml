@@ -38,9 +38,9 @@ jobs:
             --label org.opencontainers.image.description="NCCL MPI test & SSH server image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
             --label org.opencontainers.image.source="https://github.com/voltagepark/nccl-tests" \
             --label org.opencontainers.image.version="cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
-            -t ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh \
+            -t ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh-server \
             .
-          docker push ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh
+          docker push ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh-server
 
       - name: Build Docker image
         run: |
