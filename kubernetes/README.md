@@ -1,30 +1,45 @@
-# NCCL Tests - AllReduce Benchmark
+# NCCL Tests - Kubernetes
 
-## Overview
-
-This repository provides performance and correctness tests for **NCCL (NVIDIA Collective Communications Library)**, focusing on the `all_reduce` collective operation.
-
-NCCL is a high-performance library developed by NVIDIA for accelerating collective communication primitives (such as all-reduce, all-gather, broadcast, reduce, and reduce-scatter) on multi-GPU systems. It is optimized for NVIDIA hardware and widely used in deep learning frameworks like PyTorch and TensorFlow to scale training across multiple GPUs and nodes.
-
-## About the AllReduce Test
-
-The `all_reduce` operation sums arrays of data across all GPUs and distributes the result back to each GPU. It is fundamental in distributed deep learning for synchronizing gradients across devices.
-
-The NCCL `all_reduce` test measures:
-
-- **Bandwidth** (GB/s): How much data can be reduced per second.
-- **Latency** (μs): Time taken for the operation to complete.
-- **Scalability**: How performance changes with more GPUs or nodes.
-
-### 🚀 Example Usage
-
-#### Requirements
+## Requirements
 
 - Kubernetes cluster with GPU nodes
 - [Kubeflow MPI Operator](https://github.com/kubeflow/mpi-operator)
 - A valid `nccl_tests.yaml` job spec (included in this repo or customized to your environment)
+- NCCL test image w/ SSH server: `ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh-server` (matched to your local cuda version)
 
----
+## Overview
+
+#### 📦 What is the MPI Operator?
+
+The MPI operator automates the deployment and management of **MPI-based distributed jobs** in Kubernetes. It:
+
+- Manages **MPI launcher and worker pods**.
+- Sets up **hostfile configuration and SSH** for MPI to work across pods.
+- Integrates with Kubernetes to monitor pod lifecycle and job completion.
+- Enables **scaling and reproducibility** for GPU-intensive distributed training or benchmarking.
+
+When you create an `MPIJob` custom resource, the MPI Operator spawns:
+- One **launcher pod** that executes `mpirun`.
+- Multiple **worker pods**, one per replica, typically tied to a physical GPU.
+
+#### 🔗 How Do MPI Pods Find Each Other?
+
+MPI requires all participating processes to know how to **reach each other over the network**. Here's how the MPI Operator facilitates this:
+
+1. **DNS-based Pod Discovery**  
+   Worker pods are created with predictable names (e.g., `nccl-tests-worker-0`, `nccl-tests-worker-1`, etc.). These names resolve to pod IPs via Kubernetes DNS within the job's namespace.
+
+2. **Generated Hostfile**  
+   The MPI Operator automatically generates a **hostfile** containing the FQDNs/IPs of all worker pods. This file is passed to `mpirun` by the launcher pod.
+
+3. **SSH Communication**  
+   All pods use an image with an **SSH server** and shared key-based authentication, allowing passwordless SSH between launcher and workers. This is critical for `mpirun` to launch and monitor processes across nodes.
+
+4. **MPIJob Spec**  
+   The YAML defines how many replicas (`Worker.replicas`) should be created. The operator ensures these pods are running and ready before allowing the launcher pod to initiate MPI.
+
+
+## Example Usage
 
 #### 1. Deploy the MPI Operator
 
