@@ -37,7 +37,7 @@ kubectl apply --server-side -f https://raw.githubusercontent.com/kubeflow/mpi-op
 
 In the `nccl_tests.yaml` file you will find a command like:
 ```bash
-mpirun -np 64 ./build/all_reduce_perf -b 8M -e 8M -f 2 -g 1
+mpirun -np 64 ./build/all_reduce_perf -b 512M -e 8G -f 2 -g 1
 ```
 **Explanation of key flags:**
 - `-np 64`: Total number of MPI processes = total GPUs across all nodes (e.g., 8 nodes × 8 GPUs each).
@@ -53,17 +53,17 @@ spec:
       replicas: 8
 ```
 
-⚠️ Ensure the image matches the CUDA version supported on the nodes and has SSH support:
+⚠️ Ensure the image matches the CUDA version supported on the nodes and has SSH Server:
 ```yaml
 spec:
   containers:
     - name: mpi-launcher
-      image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh
+      image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh-server
 
 spec:
   containers:
     - name: mpi-worker
-      image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh
+      image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh-server
 ```
 
 #### 3. Launch the NCCL Test Job

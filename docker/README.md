@@ -16,6 +16,6 @@ docker build \
 docker run --rm -it --gpus all \
   --network=host \
   --privileged \
-  nccl-tests:cuda12.6.3-ubuntu22.04-ssh \
+  nccl-tests:cuda12.6.3-ubuntu22.04 \
   mpirun -np 2 ./build/all_reduce_perf -b 8 -e 512M -f 2 -g 1
 ```
