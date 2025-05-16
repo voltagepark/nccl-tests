@@ -6,7 +6,7 @@ on:
     paths:
       - 'docker/Dockerfile'
       - 'kubernetes/Dockerfile'
-      - '.github/workflows/docker-ghcr-cuda1263-ubuntu2204.yml'
+      - '.github/workflows/docker-ghcr-cuda1281-ubuntu2204.yml'
 
 jobs:
   build-and-push:
