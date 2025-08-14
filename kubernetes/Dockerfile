@@ -5,7 +5,6 @@ FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION}
 RUN apt-get update && apt-get install -y \
     openssh-server \
     libibverbs-dev \
-    libnccl2 libnccl-dev \
     ibverbs-utils \
     libnuma1 libnuma-dev \
     rdma-core \
