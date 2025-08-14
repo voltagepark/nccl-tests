@@ -17,6 +17,7 @@ jobs:
           include:
             - cuda: 12.8.1
               ubuntu: 22.04
+              nccl: "2.26.2-1+cuda12.8"
 
     permissions:
       contents: read
@@ -34,6 +35,7 @@ jobs:
           docker build \
             --build-arg CUDA_VERSION=${{ matrix.cuda }} \
             --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
+            --build-arg NCCL_VERSION=${{ matrix.nccl }} \
             -f kubernetes/Dockerfile \
             --label org.opencontainers.image.description="NCCL MPI test & SSH server image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
             --label org.opencontainers.image.source="https://github.com/voltagepark/nccl-tests" \
@@ -47,6 +49,7 @@ jobs:
           docker build \
             --build-arg CUDA_VERSION=${{ matrix.cuda }} \
             --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
+            --build-arg NCCL_VERSION=${{ matrix.nccl }} \
             -f docker/Dockerfile \
             --label org.opencontainers.image.description="NCCL MPI test image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
             --label org.opencontainers.image.source="https://github.com/voltagepark/nccl-tests" \
