@@ -1,5 +1,6 @@
 ARG CUDA_VERSION=12.6.3
 ARG UBUNTU_VERSION=22.04
+ARG NCCL_VERSION=2.27.7-1+cuda12.4
 FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION}
 
 RUN apt-get update && apt-get install -y \
@@ -12,6 +13,12 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
+
+RUN apt-mark unhold libnccl2 libnccl-dev || true && \
+    apt-get update && apt-get install -y libnccl2=${NCCL_VERSION} libnccl-dev=${NCCL_VERSION} && \
+    apt-mark hold libnccl2 libnccl-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 
 # Prepares SSH for mpi-operator
 RUN mkdir -p /var/run/sshd && \
