@@ -22,8 +22,8 @@ RUN apt-mark unhold libnccl2 libnccl-dev || true && \
 
 # Install HPC-X. Upgrade to DOCA_OFED once VP moves away from MLNX_OFED
 RUN mkdir -p /opt/hpcx && \
-    wget http://content.mellanox.com/hpc/hpc-x/v2.18.1/hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz && \
-    tar -xjf hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz /opt/hpcx && \
+    wget -q http://content.mellanox.com/hpc/hpc-x/v2.18.1/hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz && \
+    tar -xjf hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz -C /opt/hpcx --strip-components=1 && \
     rm hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz
 RUN echo "source /opt/hpcx/hpcx-init.sh && hpcx_load" >> /root/.bashrc
       
