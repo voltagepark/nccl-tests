@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     rdma-core \
     openmpi-bin libopenmpi-dev \
     git \
-    build-essential && \ 
+    build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 # Install latest NCCL
