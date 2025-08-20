@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     libnuma1 libnuma-dev \
     rdma-core \
     openmpi-bin libopenmpi-dev \
+    wget \
     git \
     build-essential && \
     rm -rf /var/lib/apt/lists/*
