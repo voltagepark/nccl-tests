@@ -41,7 +41,7 @@ MPI requires all participating processes to know how to **reach each other over 
 
 ## Example Usage
 
-#### 1. Deploy the MPI Operator
+#### 1. Deploy the MPI Operator **[OPTIONAL: `mpi-operator` comes installed on MKS Clusters]**
 
 The MPI Operator is required to manage distributed MPI workloads across your Kubernetes cluster:
 ```bash
