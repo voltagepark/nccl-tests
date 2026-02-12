@@ -19,6 +19,14 @@ spec:
                 - --allow-run-as-root
                 - -np
                 - "64"
+                - -npernode
+                - "8"
+                - --bind-to
+                - none
+                - -x
+                - NCCL_DEBUG=INFO
+                - -x
+                - LD_LIBRARY_PATH
                 - ./build/all_reduce_perf
                 - -b
                 - 512M
@@ -39,10 +47,15 @@ spec:
               resources:
                 limits:
                   nvidia.com/gpu: 8
+                  rdma/hca_shared_devices_a: 1
                   cpu: 64
                   memory: 512Gi
+                requests:
+                  nvidia.com/gpu: 8
+                  rdma/hca_shared_devices_a: 1
               securityContext:
-                privileged: true
+                capabilities:
+                  add: ["IPC_LOCK"]
               volumeMounts:
                 - mountPath: /dev/shm
                   name: dshm
