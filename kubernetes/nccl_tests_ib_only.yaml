@@ -1,0 +1,86 @@
+# NCCL InfiniBand Isolation Test
+# Forces ALL traffic through InfiniBand by disabling NVLink P2P and shared memory.
+# Useful for verifying IB fabric health independent of intra-node transports.
+#
+# Expected: ~49 GB/s busbw per GPU on NDR400 HCAs
+#
+# Usage:
+#   1. Update -np (TOTAL_GPUS = replicas * 8) and replicas to match your cluster
+#   2. kubectl apply -f nccl_tests_ib_only.yaml
+#   3. kubectl logs -f <launcher-pod>
+apiVersion: kubeflow.org/v2beta1
+kind: MPIJob
+metadata:
+  name: nccl-test-ib-only
+spec:
+  runPolicy:
+    cleanPodPolicy: Running
+  slotsPerWorker: 8
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        spec:
+          containers:
+            - name: mpi-launcher
+              image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh-server
+              args:
+                - mpirun
+                - --allow-run-as-root
+                - -np
+                - "64"
+                - -npernode
+                - "8"
+                - --bind-to
+                - none
+                - -x
+                - NCCL_DEBUG=INFO
+                - -x
+                - LD_LIBRARY_PATH
+                - -x
+                - NCCL_IB_HCA=mlx5
+                - -x
+                - NCCL_P2P_DISABLE=1
+                - -x
+                - NCCL_SHM_DISABLE=1
+                - -x
+                - NCCL_IB_DISABLE=0
+                - -x
+                - NCCL_NET_GDR_LEVEL=5
+                - ./build/all_reduce_perf
+                - -b
+                - 512M
+                - -e
+                - 8G
+                - -f
+                - "2"
+                - -g
+                - "1"
+    Worker:
+      replicas: 8
+      template:
+        spec:
+          runtimeClassName: nvidia
+          containers:
+            - name: mpi-worker
+              image: ghcr.io/voltagepark/nccl-tests:cuda12.4.1-ubuntu22.04-ssh-server
+              resources:
+                limits:
+                  nvidia.com/gpu: 8
+                  rdma/hca_shared_devices_a: 1
+                  cpu: 64
+                  memory: 512Gi
+                requests:
+                  nvidia.com/gpu: 8
+                  rdma/hca_shared_devices_a: 1
+              securityContext:
+                capabilities:
+                  add: ["IPC_LOCK"]
+              volumeMounts:
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: dshm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 256Gi

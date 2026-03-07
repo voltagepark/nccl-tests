@@ -94,3 +94,15 @@ This will start the NCCL all_reduce_perf benchmark across the configured GPU wor
 Note: The launcher pod may enter a CrashLoopBackOff state until all worker pods are up and running. 
 
 For debugging add the flag `-x NCCL_DEBUG=INFO` to the MPI command.
+
+## InfiniBand Isolation Test
+
+To measure pure InfiniBand fabric performance (bypassing NVLink and shared memory), use the IB-only test:
+
+```bash
+kubectl apply -f kubernetes/nccl_tests_ib_only.yaml
+```
+
+This test sets `NCCL_P2P_DISABLE=1` and `NCCL_SHM_DISABLE=1` to force all GPU communication through the IB network. On NDR400 HCAs, expect ~49 GB/s bus bandwidth per GPU at large message sizes.
+
+Compare results against the standard test to isolate whether performance issues originate from the IB fabric or intra-node transports (NVLink/SHM).
