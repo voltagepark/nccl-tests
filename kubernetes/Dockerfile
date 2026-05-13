@@ -9,22 +9,24 @@ RUN apt-get update && apt-get install -y \
     libnuma1 libnuma-dev \
     rdma-core \
     openmpi-bin libopenmpi-dev \
+    wget \
     git \
     build-essential && \
     rm -rf /var/lib/apt/lists/*
 
-# Install latest NCCL
-ARG NCCL_VERSION=2.27.7-1+cuda12.4
+ARG LIBNCCL_VERSION=2.27.7-1+cuda12.4
+ARG EXTRA_PKGS=""
 RUN apt-mark unhold libnccl2 libnccl-dev || true && \
-    apt-get update && apt-get install -y libnccl2=${NCCL_VERSION} libnccl-dev=${NCCL_VERSION} && \
+    apt-get update && apt-get install -y libnccl2=${LIBNCCL_VERSION} libnccl-dev=${LIBNCCL_VERSION} ${EXTRA_PKGS} && \
     apt-mark hold libnccl2 libnccl-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Install HPC-X. Upgrade to DOCA_OFED once VP moves away from MLNX_OFED
+ARG HPCX_URL="http://content.mellanox.com/hpc/hpc-x/v2.18.1/hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz"
 RUN mkdir -p /opt/hpcx && \
-    wget -q http://content.mellanox.com/hpc/hpc-x/v2.18.1/hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz && \
-    tar -xjf hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz -C /opt/hpcx --strip-components=1 && \
-    rm hpcx-v2.18.1-gcc-mlnx_ofed-ubuntu22.04-cuda12-x86_64.tbz
+    wget -q ${HPCX_URL} && \
+    tar -xjf hpcx-*.tbz -C /opt/hpcx --strip-components=1 && \
+    rm -vf hpcx-*.tbz
 RUN echo "source /opt/hpcx/hpcx-init.sh && hpcx_load" >> /root/.bashrc
       
 # Prepares SSH for mpi-operator
