@@ -39,7 +39,7 @@ jobs:
             --build-arg CUDA_VERSION=${{ matrix.cuda }} \
             --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
             --build-arg LIBNCCL_VERSION=${{ matrix.nccl }} \
-            --build-arg EXTRA_PKGS=${{ matrix.extra_pkgs }} \
+            --build-arg EXTRA_PKGS="${{ matrix.extra_pkgs }}" \
             --build-arg HPCX_URL=${{ matrix.hpcx_url }} \
             -f kubernetes/Dockerfile \
             --label org.opencontainers.image.description="NCCL MPI test & SSH server image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
@@ -55,7 +55,7 @@ jobs:
             --build-arg CUDA_VERSION=${{ matrix.cuda }} \
             --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
             --build-arg LIBNCCL_VERSION=${{ matrix.nccl }} \
-            --build-arg EXTRA_PKGS=${{ matrix.extra_pkgs }} \
+            --build-arg EXTRA_PKGS="${{ matrix.extra_pkgs }}" \
             --build-arg HPCX_URL=${{ matrix.hpcx_url }} \
             -f docker/Dockerfile \
             --label org.opencontainers.image.description="NCCL MPI test image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
