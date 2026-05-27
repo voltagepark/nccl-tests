@@ -1,0 +1,66 @@
+name: Build and Push to GHCR
+
+on:
+  push:
+    branches: [ main, cuda13 ]
+    paths:
+      - 'docker/Dockerfile'
+      - 'kubernetes/Dockerfile'
+      - '.github/workflows/docker-ghcr-cuda1310-ubuntu2204.yml'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    strategy:
+        matrix:
+          include:
+            - cuda: 13.1.0
+              ubuntu: 22.04
+              nccl: "2.29.3-1+cuda13.1"
+              extra_pkgs: "cuda-compat-13-1=590.48.01-0ubuntu1"
+              # no MLNX_OFED available for cuda 13
+              hpcx_url: "https://content.mellanox.com/hpc/hpc-x/v2.25.1_cuda13/hpcx-v2.25.1-gcc-doca_ofed-ubuntu22.04-cuda13-x86_64.tbz"
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate Docker to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build Docker image with SSH server (for kubernetes mpi-operator)
+        run: |
+          docker build \
+            --build-arg CUDA_VERSION=${{ matrix.cuda }} \
+            --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
+            --build-arg LIBNCCL_VERSION=${{ matrix.nccl }} \
+            --build-arg EXTRA_PKGS="${{ matrix.extra_pkgs }}" \
+            --build-arg HPCX_URL=${{ matrix.hpcx_url }} \
+            -f kubernetes/Dockerfile \
+            --label org.opencontainers.image.description="NCCL MPI test & SSH server image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
+            --label org.opencontainers.image.source="https://github.com/voltagepark/nccl-tests" \
+            --label org.opencontainers.image.version="cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
+            -t ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh-server \
+            .
+          docker push ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}-ssh-server
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg CUDA_VERSION=${{ matrix.cuda }} \
+            --build-arg UBUNTU_VERSION=${{ matrix.ubuntu }} \
+            --build-arg LIBNCCL_VERSION=${{ matrix.nccl }} \
+            --build-arg EXTRA_PKGS="${{ matrix.extra_pkgs }}" \
+            --build-arg HPCX_URL=${{ matrix.hpcx_url }} \
+            -f docker/Dockerfile \
+            --label org.opencontainers.image.description="NCCL MPI test image with CUDA ${{ matrix.cuda }} on Ubuntu ${{ matrix.ubuntu }}" \
+            --label org.opencontainers.image.source="https://github.com/voltagepark/nccl-tests" \
+            --label org.opencontainers.image.version="cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}" \
+            -t ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}\
+            .
+          docker push ghcr.io/voltagepark/nccl-tests:cuda${{ matrix.cuda }}-ubuntu${{ matrix.ubuntu }}
